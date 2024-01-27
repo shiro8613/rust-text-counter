@@ -13,7 +13,7 @@ fn main() {
         let mut s = String::new();
         let mut sin = stdin();
         if sin.is_terminal() {
-            println!("use stdin or rtc [file_extension or '*'] [file_path]");
+            println!("use stdin or rtc [file_extension or '%'] [file_path]");
             return;
         }
         sin.read_to_string(&mut s).expect("");
@@ -27,9 +27,9 @@ fn main() {
 
     for file_path in file_paths {
         let p = Path::new(&file_path);
-        if is_dir(&p) {
+        if p.is_dir() {
             let mut ses = read_dir(&file_path);
-            if ext_op != "*" {
+            if ext_op != "%" {
                 ses = ses.iter()
                     .filter(|&x| x.ends_with(ext_op.as_str()))
                     .map(|x| x.clone())
@@ -44,16 +44,6 @@ fn main() {
 
     let data_map = files_counter(final_paths);
     display(data_map);
-}
-
-#[cfg(target_os = "windows")]
-fn is_dir(p :&Path) -> bool {
-    p.is_dir()
-}
-
-#[cfg(target_os = "macos")]
-fn is_dir(p :&Path) -> bool {
-    p.ends_with(".d")
 }
 
 fn files_counter(files :Vec<String>) -> HashMap<String, (usize, usize)> {
@@ -156,7 +146,7 @@ fn read_dir(p :&String) -> Vec<String> {
     for entry in files {
         let file_path = entry.unwrap().path();
         let path_string = file_path.to_str().unwrap().to_string();
-        if is_dir(file_path.as_path()) {
+        if file_path.is_dir() {
             let s = read_dir(&path_string);
             s.iter().for_each(|x| results.push(x.to_string()));
         } else {
