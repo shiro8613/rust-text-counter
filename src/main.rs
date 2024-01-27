@@ -17,7 +17,12 @@ fn main() {
             return;
         }
         sin.read_to_string(&mut s).expect("");
-        file_paths = s.split("\r").map(|x| x.to_string()).collect();
+        file_paths = s.split("\r")
+            .map(|x| x.to_string())
+            .map(|x| x.replace("\n", ""))
+            .map(|x| x.replace("\r", ""))
+            .filter(|x| !x.is_empty())
+            .collect();
     } else {
         ext_op = file_paths.get(0).unwrap().clone();
         file_paths = file_paths.iter().map(|x| x.clone()).skip(1).collect();
@@ -50,15 +55,17 @@ fn files_counter(files :Vec<String>) -> HashMap<String, (usize, usize)> {
     let mut map = HashMap::new();
 
     for file_string in files {
-        let mut file = File::open(&file_string).expect("no file");
-        let mut s = String::new();
-        let res = file.read_to_string(&mut s);
-        let x = char_count(&mut s);
-        match res {
-            Ok(_) => {
-                map.insert(file_string, x);
+        let file_res = File::open(&file_string);
+        if let Ok(mut file) = file_res {
+            let mut s = String::new();
+            let res = file.read_to_string(&mut s);
+            let x = char_count(&mut s);
+            match res {
+                Ok(_) => {
+                    map.insert(file_string, x);
+                }
+                Err(_) => continue,
             }
-            Err(_) => continue,
         }
     }
 
