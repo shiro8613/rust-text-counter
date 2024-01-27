@@ -81,8 +81,6 @@ fn display(data :HashMap<String, (usize, usize)>) {
     let names :Vec<usize> = data.keys().map(|x| x.len()).collect();
     let name_max = names.iter().fold(0, |c, &x | if c < x {x} else {c});
 
-    println!("{}, {}, {}",name_max, count.0, count.1);
-
     let name_sp = " ".repeat(over(name_max));
     let char_sp = " ".repeat(over(count.0));
     let line_sp = " ".repeat(over(count.1));
