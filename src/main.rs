@@ -27,7 +27,7 @@ fn main() {
 
     for file_path in file_paths {
         let p = Path::new(&file_path);
-        if p.is_dir() {
+        if is_dir(&p) {
             let mut ses = read_dir(&file_path);
             if ext_op != "*" {
                 ses = ses.iter()
@@ -44,6 +44,16 @@ fn main() {
 
     let data_map = files_counter(final_paths);
     display(data_map);
+}
+
+#[cfg(target_os = "windows")]
+fn is_dir(p :&Path) -> bool {
+    p.is_dir()
+}
+
+#[cfg(target_os = "macos")]
+fn is_dir(p :&Path) -> bool {
+    p.ends_with(".d")
 }
 
 fn files_counter(files :Vec<String>) -> HashMap<String, (usize, usize)> {
@@ -146,7 +156,7 @@ fn read_dir(p :&String) -> Vec<String> {
     for entry in files {
         let file_path = entry.unwrap().path();
         let path_string = file_path.to_str().unwrap().to_string();
-        if file_path.is_dir() {
+        if is_dir(file_path.as_path()) {
             let s = read_dir(&path_string);
             s.iter().for_each(|x| results.push(x.to_string()));
         } else {
