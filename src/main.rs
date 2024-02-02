@@ -75,7 +75,7 @@ fn files_counter(files :Vec<String>) -> HashMap<String, (usize, usize)> {
 }
 
 fn display(data :HashMap<String, (usize, usize)>) {
-    let count_max = data.values().fold((0,0), |(x,y),&(x1, y1)| (x.max(x1 as i64), y.max(y1 as i64)));
+    let count_total = data.values().fold((0, 0), |(x,y), &(x1, y1)| (x + (x1 as i64), y + (y1 as i64)));
 
     let mut data_vec :Vec<(String, String, String)> = data.iter()
         .map(|(k,v)| (k.clone(), v.0.clone(), v.1.clone()))
@@ -83,7 +83,7 @@ fn display(data :HashMap<String, (usize, usize)>) {
         .collect();
 
     data_vec.insert(0, ("Name".to_string(), "Char".to_string(), "Line".to_string()));
-    data_vec.push(("Total".to_string(), count_max.0.to_string(), count_max.1.to_string()));
+    data_vec.push(("Total".to_string(), count_total.0.to_string(), count_total.1.to_string()));
 
     let data_all_len = data_vec.iter()
         .map(|(x,y,z)| (x.len(), y.len(), z.len()))
