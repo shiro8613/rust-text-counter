@@ -15,7 +15,7 @@ fn main() {
         let mut s = String::new();
         let mut sin = stdin();
         if sin.is_terminal() {
-            println!("use stdin or rtc [file_extension or '%'] [file_path]");
+            println!("use stdin or rwc [file_extension or '%'] [file_path]");
             return;
         }
         sin.read_to_string(&mut s).expect("");
