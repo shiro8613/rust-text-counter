@@ -26,7 +26,10 @@ fn main() {
             .filter(|x| !x.is_empty())
             .collect();
     } else {
-        ext_op = file_paths.get(0).unwrap().clone();
+        if let Some(ext) = file_paths.get(0) {
+            ext_op = ext.clone();
+        }
+
         file_paths = file_paths.iter().map(|x| x.clone()).skip(1).collect();
     }
 
@@ -108,15 +111,20 @@ fn display(data :HashMap<String, (usize, usize)>) {
 fn read_dir(p :&String) -> Vec<String> {
     let mut results :Vec<String> = Vec::new();
     let dir = PathBuf::from(p);
-    let files = dir.read_dir().unwrap();
-    for entry in files {
-        let file_path = entry.unwrap().path();
-        let path_string = file_path.to_str().unwrap().to_string();
-        if file_path.is_dir() {
-            let s = read_dir(&path_string);
-            s.iter().for_each(|x| results.push(x.to_string()));
-        } else {
-            results.push(path_string);
+    if let Ok(files) = dir.read_dir() {
+        for entry in files {
+            if let Ok(entry) = entry {
+                let file_path = entry.path();
+                if let Some(path_string) = file_path.to_str() {
+                    let path_string = path_string.to_string();
+                    if file_path.is_dir() {
+                        let s = read_dir(&path_string);
+                        s.iter().for_each(|x| results.push(x.to_string()));
+                    } else {
+                        results.push(path_string);
+                    }
+                }
+            }
         }
     }
 
