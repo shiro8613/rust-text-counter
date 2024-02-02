@@ -65,11 +65,8 @@ fn files_counter(files :Vec<String>) -> HashMap<String, (usize, usize)> {
             let mut s = String::new();
             let res = file.read_to_string(&mut s);
             let x = char_count(&mut s);
-            match res {
-                Ok(_) => {
-                    map.insert(file_string, x);
-                }
-                Err(_) => continue,
+            if let Ok(_) = res {
+                map.insert(file_string, x);
             }
         }
     }
