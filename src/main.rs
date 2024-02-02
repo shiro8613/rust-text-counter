@@ -4,6 +4,8 @@ use std::fs::File;
 use std::io::{IsTerminal, Read, stdin};
 use std::path::{Path, PathBuf};
 
+const LEN_PLUS: i64 = 2;
+
 fn main() {
     let mut ext_op = "".to_string();
     let mut final_paths :Vec<String> = Vec::new();
@@ -73,77 +75,34 @@ fn files_counter(files :Vec<String>) -> HashMap<String, (usize, usize)> {
 }
 
 fn display(data :HashMap<String, (usize, usize)>) {
-    let counts :Vec<(usize, usize)> = data.values()
-        .map(|x| (x.0.clone(), x.1.clone()))
+    let count_max = data.values().fold((0,0), |(x,y),&(x1, y1)| (x.max(x1 as i64), y.max(y1 as i64)));
+
+    let mut data_vec :Vec<(String, String, String)> = data.iter()
+        .map(|(k,v)| (k.clone(), v.0.clone(), v.1.clone()))
+        .map(|(k,x,y)| (k, x.to_string(), y.to_string()))
         .collect();
-    let total = counts.iter()
-        .fold((0, 0), |(c, l), &(x, y)| (c + x, l +y));
-    let count = counts.iter().map(|x| (x.0.to_string().len(), x.1.to_string().len()))
-        .fold((0,0), |(c, l), (x, y)| {
-        (
-            if c < x {x} else {c},
-            if l < y {y} else {l}
-        )
-    });
-    let names :Vec<usize> = data.keys().map(|x| x.len()).collect();
-    let name_max = names.iter().fold(0, |c, &x | if c < x {x} else {c});
 
-    let name_sp = " ".repeat(over(name_max));
-    let char_sp = " ".repeat(over(count.0));
-    let line_sp = " ".repeat(over(count.1));
-    let lc_sp = char_sp.clone() + line_sp.as_str();
+    data_vec.insert(0, ("Name".to_string(), "Char".to_string(), "Line".to_string()));
+    data_vec.push(("Total".to_string(), count_max.0.to_string(), count_max.1.to_string()));
 
-    print!("{}Name{}    Char{}{}Line\n",name_sp.clone() + if name_sp.len() < 7 {" "} else {""}, name_sp, char_sp, line_sp );
-    print!("{}    {}{}{}\n", "-".repeat(u_under(name_max)),
-           "-". repeat(u_under(count.0)),
-           lc_sp,
-           "-".repeat(u_under(count.1)));
+    let data_all_len = data_vec.iter()
+        .map(|(x,y,z)| (x.len(), y.len(), z.len()))
+        .map(|(x, y, z)| (x as i64, y as i64, z as i64))
+        .fold((0,0,0), |(x, y, z), (x1, y1, z1)| (x.max(x1), y.max(y1), z.max(z1)));
 
-    for (k, v) in data {
-        print!("{}    {}{}{}{}\n", k, " ".repeat(over_s(name_max, k.len())), v.0,
-               format!("{}{}"," ".repeat(over_s(count.0, v.0.to_string().len())),lc_sp), v.1);
-    }
-
-    print!("\n");
-    print!("total(Char) {}\n", total.0);
-    print!("total(Line) {}\n", total.1);
-}
-
-fn u_under(u :usize) -> usize {
-    if u < 4 {
-        4
-    } else {
-        u
-    }
-}
-
-fn over(u :usize) -> usize {
-    if u <=4 {
-        1
-    } else {
-        let i = u as i64 -4;
-        let i = i /2;
-        if i <= 4 {
-            1
-        } else {
-            let f = (i as f64).floor();
-            f as usize
+    for (index, display_column) in data_vec.iter().enumerate() {
+        if index == 1 || index == data_vec.len() -1{
+            println!("{}", "-".repeat((data_all_len.0 + data_all_len.1 + data_all_len.2 + (LEN_PLUS *2)) as usize));
         }
-    }
-}
 
-fn over_s(u :usize, i :usize) -> usize {
-    let mut f = (u as i64) - (i as i64);
-
-    if u < 4 {
-        f = 4 - (i as i64);
+        println!("{}{}{}{}{}", display_column.0,
+                 " ".repeat(((data_all_len.0 - display_column.0.len() as i64) +LEN_PLUS) as usize),
+                 display_column.1,
+                 " ".repeat(((data_all_len.1 - display_column.1.len() as i64) +LEN_PLUS) as usize),
+                 display_column.2
+        )
     }
 
-    if f < 0 {
-        0
-    } else {
-        f as usize
-    }
 }
 
 fn read_dir(p :&String) -> Vec<String> {
